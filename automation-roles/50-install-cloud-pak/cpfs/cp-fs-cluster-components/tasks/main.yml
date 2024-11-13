@@ -10,18 +10,18 @@
     path: /tmp/work/offline
     state: absent
 
-- name: If air-gapped, copy case files from {{ status_dir }}/work/offline to /tmp/work/offline
-  copy:
-    src: "{{ status_dir }}/work/offline"
-    dest: /tmp/work/
-    remote_src: True
-  when: (cpd_airgap | default(False) | bool)
+# - name: If air-gapped, copy case files from {{ status_dir }}/work/offline to /tmp/work/offline
+#   copy:
+#     src: "{{ status_dir }}/work/offline"
+#     dest: /tmp/work/
+#     remote_src: True
+#   when: (cpd_airgap | default(False) | bool)
 
 - set_fact:
-    _cert_manager_project: 'ibm-cert-manager'
+    _cert_manager_project: "ibm-cert-manager"
 
 - set_fact:
-    _cert_manager_project: 'cert-manager'
+    _cert_manager_project: "cert-manager"
   when: (_p_cert_manager | default('ibm')) != 'ibm'
 
 - name: Generate apply-cluster-components script {{ _v_template_dest_directory }}/{{ _p_openshift_cluster_name }}-apply-cluster-components.sh
@@ -33,8 +33,8 @@
 - name: Run shell script to apply cluster components on OpenShift cluster {{ _p_openshift_cluster_name }}, logs are in {{ status_dir }}/log/{{ _p_openshift_cluster_name }}-apply-cluster-components.log
   shell: |
     {{ _v_template_dest_directory }}/{{ _p_openshift_cluster_name }}-apply-cluster-components.sh
-  when: 
-  - not _p_preview
+  when:
+    - not _p_preview
 
 - name: Set number of threads per core to {{ _threads_per_core }}
   shell: |

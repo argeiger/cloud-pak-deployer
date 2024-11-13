@@ -56,6 +56,15 @@ RUN chown -R ${USER_ID}:0 /Data && \
     chmod -R ug+rwx /cloud-pak-deployer/docker-scripts && \
     chmod ug+rwx /cloud-pak-deployer/*.sh
 
+# CLI utilities for air-gapped environment
+RUN mkdir -p /Data/downloads && \ 
+    wget -O /Data/downloads/cpd-cli-linux.tar.gz $(curl -s https://api.github.com/repos/IBM/cpd-cli/releases/latest | jq -r '.assets[] | select( .browser_download_url | contains("linux-EE")).browser_download_url') && \
+    tar -xvzf /Data/downloads/cpd-cli-linux.tar.gz -C /usr/local/bin --strip-components=1 && \
+    wget -O /Data/downloads/cloudctl-linux-amd64.tar.gz https://github.com/IBM/cloud-pak-cli/releases/download/$(curl -s https://api.github.com/repos/IBM/cloud-pak-cli/releases/latest | jq -r .tag_name)/cloudctl-linux-amd64.tar.gz && \
+    tar -xvzf /Data/downloads/cloudctl-linux-amd64.tar.gz -C /usr/local/bin && \
+    mv /usr/local/bin/cloudctl-linux-amd64 /usr/local/bin/cloudctl && \
+    rm -rf /Data/downloads
+
 # USER ${USER_UID}
 
 ENTRYPOINT ["/cloud-pak-deployer/docker-scripts/container-bash.sh"]

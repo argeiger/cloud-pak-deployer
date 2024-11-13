@@ -1,3 +1,4 @@
 case-download \
+    --from_oci=true \
     --release={{ _p_current_cp4d_cluster.cp4d_version }} \
     --components={%- if _p_current_cp4d_cluster.cp4d_version >= '4.7.0' %}ibm-cert-manager,ibm-licensing,{%- endif %}{{ _cartridges_to_install_list }} \

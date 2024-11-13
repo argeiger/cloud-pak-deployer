@@ -33,12 +33,15 @@
   until: _download_result is succeeded
   retries: 5
   delay: 30
-  when: _ocp_client_download.stat.exists == False
+  when:
+    - _ocp_client_download.stat.exists == False
+    - not (cpd_airgap | bool)
 
 - name: Unpack OpenShift client from {{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}
   unarchive:
     src: "{{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
     dest: "/usr/local/bin"
+  when: (_ocp_client_download is succeeded or _ocp_client_download.stat.exists == True) and not (cpd_airgap | bool)
 
 - name: Get OpenShift client version
   shell: |

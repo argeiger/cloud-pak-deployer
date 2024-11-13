@@ -31,36 +31,36 @@
 
 # Only run olm-utils command when not air-gapped and when file does not exist yet
 - block:
-  - name: Generate OLM command to list components for version {{ _p_current_cp4d_cluster.cp4d_version }}
-    set_fact:
-      _list_components_command: "{{ lookup('template', 'list-components-olm-utils.j2') }}" 
+    - name: Generate OLM command to list components for version {{ _p_current_cp4d_cluster.cp4d_version }}
+      set_fact:
+        _list_components_command: "{{ lookup('template', 'list-components-olm-utils.j2') }}"
 
-  - name: Show list-components command
-    debug:
-      var: _list_components_command
+    - name: Show list-components command
+      debug:
+        var: _list_components_command
 
-  - name: Run list-components command 
-    shell: |
-      {{ _list_components_command }}
+    - name: Run list-components command
+      shell: |
+        {{ _list_components_command }}
 
-  # Try to copy the list-components output file. In certain situations (Windows, SELinux), the command may fail and has to be re-run without remote_src
-  - block:
-    - name: Copy file to {{ _cp4d_components_file }}
-      copy:
-        src: /tmp/work/components.csv
-        dest: "{{ _cp4d_components_file }}"
-        remote_src: True
-        force: True
-        mode: u+rwx,g+rwx,o+rwx
-    rescue:
-    - name: Rescue copy file to {{ _cp4d_components_file }}
-      copy:
-        src: /tmp/work/components.csv
-        dest: "{{ _cp4d_components_file }}"
+    # Try to copy the list-components output file. In certain situations (Windows, SELinux), the command may fail and has to be re-run without remote_src
+    - block:
+        - name: Copy file to {{ _cp4d_components_file }}
+          copy:
+            src: /tmp/work/components.csv
+            dest: "{{ _cp4d_components_file }}"
+            remote_src: True
+            force: True
+            mode: u+rwx,g+rwx,o+rwx
+      rescue:
+        - name: Rescue copy file to {{ _cp4d_components_file }}
+          copy:
+            src: /tmp/work/components.csv
+            dest: "{{ _cp4d_components_file }}"
 
   when:
-  - not (cpd_airgap | bool)
-  - not _cp4d_components_file_exists.stat.exists
+    #- not (cpd_airgap | bool)
+    - not _cp4d_components_file_exists.stat.exists
 
 - name: Check if file {{ _cp4d_components_file }} exists
   stat:
@@ -81,22 +81,22 @@
     _csv_column_headers: "{{ _csv_column_headers_output.stdout }}"
 
 - name: Patch column headers if incorrect (CP4D 5.0.2)
-  set_fact: 
+  set_fact:
     _csv_column_headers: "Component name,Description,Is Automatic Dependency,CASE Name,CASE Version,Operator CSV Version,CR API,CR Kind,CR Name,CR Version,Dependencies,Supported Architecture,Support Online Upgrade"
   when: not _csv_column_headers is search("Component name")
 
 # Try to copy the list-components output file. In certain situations (Windows, SELinux), the command may fail and has to be re-run without remote_src
 - block:
-  - name: Copy file to {{ _cp4d_components_no_header_file }}
-    copy:
-      src: "{{ _cp4d_components_file }}"
-      dest: "{{ _cp4d_components_no_header_file }}"
-      remote_src: True
+    - name: Copy file to {{ _cp4d_components_no_header_file }}
+      copy:
+        src: "{{ _cp4d_components_file }}"
+        dest: "{{ _cp4d_components_no_header_file }}"
+        remote_src: True
   rescue:
-  - name: Copy file to {{ _cp4d_components_no_header_file }}
-    copy:
-      src: "{{ _cp4d_components_file }}"
-      dest: "{{ _cp4d_components_no_header_file }}"
+    - name: Copy file to {{ _cp4d_components_no_header_file }}
+      copy:
+        src: "{{ _cp4d_components_file }}"
+        dest: "{{ _cp4d_components_no_header_file }}"
 
 - name: Remove first line from file
   lineinfile:

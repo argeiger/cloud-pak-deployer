@@ -542,10 +542,6 @@ while (( "$#" )); do
     shift 1
     ;;  
   --air-gapped)
-    if ${INSIDE_CONTAINER};then
-      echo "$1 flag not allowed when running inside container"
-      exit 99
-    fi
     if [[ "${ACTION}" != "apply" && "${ACTION}" != "destroy" && "${SUBCOMMAND}" != "vault" ]];then
       echo "Error: --air-gapped is only valid for environment subcommand with apply/destroy or vault."
       command_usage 2
@@ -617,7 +613,7 @@ fi
 
 # Get the CPU ARCH of the current system
 ARCH=$(uname -m)
-if [ "${ARCH}" == "amd64" ];then
+if [ "${ARCH}" == "amd64" ] || [ "${ARCH}" == "arm64" ] ;then
   ARCH="x86_64"
 fi
 
